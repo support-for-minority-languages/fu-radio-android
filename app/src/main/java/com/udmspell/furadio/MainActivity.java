@@ -6,6 +6,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -109,7 +111,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
 	private List<Tag> createTags() {
 		// create the list of tags with popularity values and related url
-		List<Tag> tempList = new ArrayList<Tag>();
+		List<Tag> tempList = new ArrayList<>();
 
 		tempList.add(new Tag("Моя Удмуртия", 7, "http://radio.myudm.ru:10010/mp3"));
 		tempList.add(new Tag("Удмуртское радио", 6, "http://radio.myudm.ru:10000/udm"));
@@ -132,6 +134,10 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     private void startPlaying(String stationUrl) {
         loading = true;
+        // индикация загрузки
+        Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
+        imageView.startAnimation(scaleAnimation);
+
         try {
             player.setDataSource(stationUrl);
         } catch (IOException e) {
@@ -144,6 +150,9 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
             public void onPrepared(MediaPlayer mp) {
                 player.start();
                 loading = false;
+                // остановка индикации загрузки
+                imageView.clearAnimation();
+                // начало анимации воспроизвдения
                 rippleBackground.startRippleAnimation();
             }
         });

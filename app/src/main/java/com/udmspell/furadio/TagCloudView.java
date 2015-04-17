@@ -16,8 +16,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.OverScroller;
 import android.widget.RelativeLayout;
+import android.widget.Scroller;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class TagCloudView extends RelativeLayout {
     private boolean actionMove;
 
     private GestureDetector gestureDetector;
-    private OverScroller overScroller;
+    private Scroller scroller;
     private int startX;
     private int startY;
 
@@ -148,8 +148,8 @@ public class TagCloudView extends RelativeLayout {
         }
 
         gestureDetector = new GestureDetector(mContext, new GestureListener());
-        overScroller = new OverScroller(mContext);
-        overScroller.setFriction(2000f);
+        scroller = new Scroller(mContext);
+//        scroller.setFriction(2000f);
     }
 
     @Override
@@ -157,9 +157,9 @@ public class TagCloudView extends RelativeLayout {
         super.computeScroll();
 
         Log.d(TAG, "computeScroll");
-        if (overScroller.computeScrollOffset()) {
-            int currX = overScroller.getCurrX();
-            int currY = overScroller.getCurrY();
+        if (scroller.computeScrollOffset()) {
+            int currX = scroller.getCurrX();
+            int currY = scroller.getCurrY();
             Log.d(TAG, "computeScroll: startX=" + startX + ";startY=" + startY+ ";currX=" + currX + "currY=" + currY);
 
             int dx = startX - currX;
@@ -193,7 +193,7 @@ public class TagCloudView extends RelativeLayout {
         @Override
         public boolean onDown(MotionEvent e) {
             Log.d(TAG, getTime() + "event onDown");
-            overScroller.forceFinished(true);
+            scroller.forceFinished(true);
             postInvalidateOnAnimation();
             return true;
         }
@@ -213,13 +213,14 @@ public class TagCloudView extends RelativeLayout {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.d(TAG, getTime() + "event onFling: startX=" + startX + ";startY=" + startY+ ";velocityX=" + velocityX + ";velocityY=" + velocityY);
-            overScroller.forceFinished(true);
-            overScroller.fling(startX,
+            scroller.forceFinished(true);
+            scroller.fling(startX,
                     startY,
                     (int) -velocityX,
                     (int) -velocityY,
                     0, viewWidth,
                     0, viewHeight);
+            postInvalidateOnAnimation();
             return true;
         }
 

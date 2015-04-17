@@ -106,7 +106,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
 //	public boolean onTouchEvent(MotionEvent e) {
 //		Log.d(TAG, getTime() + "super movition:x=" + e.getX() + ",y=" + e.getY() + ",action is [" + e.getAction() + "]");
-//		return mTagCloudView.onTouchEvent(e);
+//		return mTagCloudView.onTouchEvent(e) || super.onTouchEvent(e);
 //	}
 
 	private List<Tag> createTags() {
@@ -161,6 +161,8 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     private void stopPlaying() {
         loading = false;
+        // остановка индикации загрузки
+        imageView.clearAnimation();
         if (player != null) {
             rippleBackground.stopRippleAnimation();
             imageView.setImageResource(R.drawable.play);

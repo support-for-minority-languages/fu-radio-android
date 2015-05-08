@@ -42,7 +42,6 @@ public class TagCloudView extends RelativeLayout {
     private int shiftLeft;
 
     private final String TAG = "cloudtag";
-    private boolean actionMove;
 
     private GestureDetector gestureDetector;
     private Scroller scroller;
@@ -347,15 +346,9 @@ public class TagCloudView extends RelativeLayout {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (actionMove) {
-                    actionMove = false;
-                    return;
-                }
-
                 Animation scaleAnimation = AnimationUtils.loadAnimation(mContext, R.anim.scale);
                 v.startAnimation(scaleAnimation);
                 tagCallback.onClick(title, url);
-                actionMove = false;
             }
         };
     }
@@ -400,10 +393,5 @@ public class TagCloudView extends RelativeLayout {
         }
         return tempTagList;
     }
-
-    // for handling the click on the tags
-    // onclick open the tag url in a new window. Back button will bring you back
-    // to TagCloud
-
 
 }

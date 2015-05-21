@@ -1,10 +1,12 @@
 package com.udmspell.furadio;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -14,20 +16,20 @@ import android.widget.Toast;
 
 import com.skyfishjy.library.RippleBackground;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements TagCloudView.TagCallback {
     private static final String STATION_TITLE = "station_title";
     private static final String SAVED_URL = "saved_url";
+
     private TagCloudView mTagCloudView;
-	private final String TAG = "cloudtag";
-    private MediaPlayer player;
-    private boolean loading;
+
+    private boolean playing = false;
     private RippleBackground rippleBackground;
     private ImageView imageView;
     private SharedPreferences sPref;
+    private BroadcastReceiver updateReceiver;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,24 +48,16 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (loading) {
-                    stopPlaying();
-                    return;
-                }
-
-                if (player != null) {
-                    if (player.isPlaying()) {
-                        stopPlaying();
-                    } else {
-                        String savedUrl = sPref.getString(SAVED_URL, "");
-                        if (!savedUrl.equals("")) {
-                            startPlaying(savedUrl);
-                        }  else {
-                            startPlaying("http://radio.myudm.ru:10000/udm");
-                        }
-
-                    }
+                if (playing) {
+                    Intent intent = new Intent(Consts.RECEIVER_ACTION);
+                    intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+                    sendBroadcast(intent);
+                } else {
+                    String savedUrl = sPref.getString(SAVED_URL, "http://radio.myudm.ru:10000/udm");
+                    Intent intent = new Intent(Consts.RECEIVER_ACTION);
+                    intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
+                    intent.putExtra(Consts.STATION_URL, savedUrl);
+                    sendBroadcast(intent);
                 }
             }
         });
@@ -71,43 +65,58 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         sPref = getPreferences(MODE_PRIVATE);
         setTitle(sPref.getString(STATION_TITLE, "Радио"));
 
-        player = new MediaPlayer();
-
-        player.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+        updateReceiver = new BroadcastReceiver() {
             @Override
-            public void onBufferingUpdate(MediaPlayer mp, int percent) {
-//                selectedView.setValue(percent);
-                Log.i("Buffering", "" + percent);
+            public void onReceive(Context context, Intent intent) {
+                String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
+
+                switch (command) {
+                    case Consts.PlayerCommands.PREPARE:
+                        preparePlay();
+                        break;
+                    case Consts.PlayerCommands.PLAY:
+                        startPlaying();
+                        break;
+                    case Consts.PlayerCommands.PAUSE:
+                        stopPlaying();
+                        break;
+                }
             }
-        });
+        };
+        IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
+        this.registerReceiver(updateReceiver, intentFilter);
+        this.startService(new Intent(this, OnlineRadioService.class));
 	}
+
+    private void preparePlay() {
+        playing = true;
+        // индикация загрузки
+        Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
+        imageView.startAnimation(scaleAnimation);
+        imageView.setImageResource(R.drawable.pause);
+    }
+
+    private void startPlaying() {
+        playing = true;
+        // остановка индикации загрузки
+        imageView.clearAnimation();
+        // начало анимации воспроизвдения
+        rippleBackground.startRippleAnimation();
+    }
+
+    private void stopPlaying() {
+        playing = false;
+        // остановка индикации загрузки
+        imageView.clearAnimation();
+        rippleBackground.stopRippleAnimation();
+        imageView.setImageResource(R.drawable.play);
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (player.isPlaying()) {
-            player.stop();
-            player.release();
-        }
+        unregisterReceiver(updateReceiver);
     }
-
-//	public boolean dispatchTouchEvent(MotionEvent e) {
-//
-//		boolean result = mTagCloudView.dispatchTouchEvent(e);
-//		// boolean result = true;
-//		Log.d(TAG, getTime() + "super dispatching ... result is [" + result + "] action is [" + e.getAction() + "]");
-//		return result;
-//	}
-
-	private String getTime() {
-
-		return "[" + System.currentTimeMillis() + "] ";
-	}
-
-//	public boolean onTouchEvent(MotionEvent e) {
-//		Log.d(TAG, getTime() + "super movition:x=" + e.getX() + ",y=" + e.getY() + ",action is [" + e.getAction() + "]");
-//		return mTagCloudView.onTouchEvent(e) || super.onTouchEvent(e);
-//	}
 
 	private List<Tag> createTags() {
 		// create the list of tags with popularity values and related url
@@ -126,51 +135,14 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     public void onClick(String title, String url) {
         Toast.makeText(this, "Загрузка...", Toast.LENGTH_SHORT).show();
         setTitle(title);
-        stopPlaying();
-        startPlaying(url);
-        sPref.edit().putString(SAVED_URL, url).commit();
-        sPref.edit().putString(STATION_TITLE, getTitle().toString()).commit();
-    }
-
-    private void startPlaying(String stationUrl) {
-        loading = true;
-        // индикация загрузки
-        Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
-        imageView.startAnimation(scaleAnimation);
-
-        try {
-            player.setDataSource(stationUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        player.prepareAsync();
-        imageView.setImageResource(R.drawable.pause);
-        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-
-            public void onPrepared(MediaPlayer mp) {
-                player.start();
-                loading = false;
-                // остановка индикации загрузки
-                imageView.clearAnimation();
-                // начало анимации воспроизвдения
-                rippleBackground.startRippleAnimation();
-            }
-        });
-
-    }
-
-    private void stopPlaying() {
-        loading = false;
-        // остановка индикации загрузки
-        imageView.clearAnimation();
-        if (player != null) {
-            rippleBackground.stopRippleAnimation();
-            imageView.setImageResource(R.drawable.play);
-
-            player.stop();
-            player.release();
-            player = new MediaPlayer();
-        }
+//        stopPlaying();
+//        startPlaying();
+        Intent intent = new Intent(Consts.RECEIVER_ACTION);
+        intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
+        intent.putExtra(Consts.STATION_URL, url);
+        this.sendBroadcast(intent);
+        sPref.edit().putString(SAVED_URL, url).apply();
+        sPref.edit().putString(STATION_TITLE, getTitle().toString()).apply();
     }
 
 }

@@ -7,6 +7,7 @@ public class Consts {
     public static final String PLAYER_COMMAND = "com.udmspell.furadio.command";
     public static final String STATION_URL = "com.udmspell.furadio.station_url";
     public static final String RECEIVER_ACTION = "com.udmspell.furadio.receiver_action";
+    public static final int NOTIFICATION_ID = 1;
 
     public class PlayerCommands {
         public static final String PLAY = "COMMAND_PLAY";

@@ -11,6 +11,7 @@ public class Consts {
     public static final String SAVED_URL = "saved_url";
     public static final int NOTIFICATION_ID = 1;
     public static final String LOG_TAG = "FU_RADIO";
+    public static final String STOP_SERVICE = "STOP_SERVICE";
 
     public class PlayerCommands {
         public static final String IS_PLAYING = "COMMAND_PLAY";

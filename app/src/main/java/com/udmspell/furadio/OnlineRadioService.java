@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -30,6 +31,11 @@ public class OnlineRadioService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(Consts.LOG_TAG, "OnlineRadioService: onCreate");
+
+        Intent intentPreparePlay = new Intent(Consts.RECEIVER_ACTION);
+        intentPreparePlay.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
+        sendBroadcast(intentPreparePlay);
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String stationUrl = sharedPreferences.getString(Consts.SAVED_URL, getString(R.string.start_radio_url));
         Log.d(Consts.LOG_TAG, "ControlReceiver: stationUrl=" + stationUrl);
@@ -41,7 +47,7 @@ public class OnlineRadioService extends Service {
                 String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
                 Log.d(Consts.LOG_TAG, "ControlReceiver: command=" + command);
                 if (command == Consts.PlayerCommands.PAUSE) {
-                        stopRadio();
+                    stopRadio();
                 }
             }
 
@@ -97,7 +103,13 @@ public class OnlineRadioService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopRadio();
+
+        Intent receiverIntent = new Intent(Consts.RECEIVER_ACTION);
+        receiverIntent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+        sendBroadcast(receiverIntent);
+
         unregisterReceiver(controlReceiver);
+        notificationManager.cancel(Consts.NOTIFICATION_ID);
     }
 
     @Override
@@ -105,27 +117,44 @@ public class OnlineRadioService extends Service {
         return null;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent.getAction() == Consts.STOP_SERVICE) {
+            stopSelf();
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     public void makeNotification() {
-        int icon = R.drawable.icon; // icon from resources
-        CharSequence tickerText = getString(R.string.app_name); // ticker-text
-        long when = System.currentTimeMillis(); // notification time
-        Context context = getApplicationContext(); // application Context
-        CharSequence contentText = getString(R.string.app_name); // expanded
+        Context context = getApplicationContext();
+        String notificationTitle = getString(R.string.app_name);
+        String station = sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title));
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
 
-        Notification notification;
-        Notification.Builder builder = new Notification.Builder(context);
-        builder.setContentIntent(contentIntent)
-                .setSmallIcon(icon)
-                .setWhen(when)
-                .setContentTitle(contentText);
-        notification = builder.build();
+        Intent serviceIntent = new Intent(this, OnlineRadioService.class);
+        serviceIntent.setAction(Consts.STOP_SERVICE);
+        PendingIntent pausePendingIntent = PendingIntent.getService(context, 0, serviceIntent, 0);
+        Notification.Builder builder = new Notification.Builder(context)
+                .setContentIntent(contentIntent)
+                .setSmallIcon(R.drawable.play)
+                .setContentTitle(notificationTitle)
+                .setContentText(station)
+                .setOngoing(true)
+                .addAction(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent);
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setStyle(new Notification.MediaStyle()
+                            .setShowActionsInCompactView(0));
+        }
+        Notification notification = builder.build();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(Consts.NOTIFICATION_ID, notification);
     }
+
 
 }

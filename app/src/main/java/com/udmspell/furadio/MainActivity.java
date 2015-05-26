@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,7 +39,12 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
 		LinearLayout container = (LinearLayout) findViewById(R.id.tagCloud);
 
-		mTagCloudView = new TagCloudView(this, 720, 720, createTags(), 0, 40); // passing
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+
+		mTagCloudView = new TagCloudView(this, width, width, createTags(), 0, 40); // passing
 		mTagCloudView.requestFocus();
 		mTagCloudView.setFocusableInTouchMode(true);
 		container.addView(mTagCloudView);
@@ -114,21 +121,12 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     private void startRadioService() {
         Log.d(Consts.LOG_TAG, "MainActivity: startRadioService");
-        this.startService(new Intent(this, OnlineRadioService.class));
-
-        Intent intentPreparePlay = new Intent(Consts.RECEIVER_ACTION);
-        intentPreparePlay.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
-        sendBroadcast(intentPreparePlay);
+        startService(new Intent(this, OnlineRadioService.class));
     }
 
     private void stopRadioService() {
         Log.d(Consts.LOG_TAG, "MainActivity: stopRadioService");
-        Intent receiverIntent = new Intent(Consts.RECEIVER_ACTION);
-        receiverIntent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
-        sendBroadcast(receiverIntent);
-
-        Intent serviceIntent = new Intent(MainActivity.this, OnlineRadioService.class);
-        stopService(serviceIntent);
+        stopService(new Intent(this, OnlineRadioService.class));
     }
 
     @Override

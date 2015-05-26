@@ -16,8 +16,8 @@
         app:rb_duration="3000"
         app:rb_scale="6"
         android:layout_weight="1"
-        android:layout_marginTop="-40dp"
-        android:layout_marginBottom="-20dp">
+        android:layout_marginTop="-60dp"
+        android:layout_marginBottom="-40dp">
         <ImageView
             android:layout_width="64dp"
             android:layout_height="64dp"
@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_weight="1"
-        android:layout_marginTop="-40dp">
+        android:layout_marginTop="-70dp">
     </LinearLayout>
 
 </LinearLayout>

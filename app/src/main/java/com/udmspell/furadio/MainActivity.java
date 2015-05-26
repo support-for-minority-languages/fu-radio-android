@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -20,15 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements TagCloudView.TagCallback {
-    private static final String STATION_TITLE = "station_title";
-    private static final String SAVED_URL = "saved_url";
-
     private TagCloudView mTagCloudView;
 
     private boolean playing = false;
     private RippleBackground rippleBackground;
     private ImageView imageView;
-    private SharedPreferences sPref;
+    private SharedPreferences sharedPreferences;
     private BroadcastReceiver updateReceiver;
 
     @Override
@@ -49,46 +48,46 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
             @Override
             public void onClick(View view) {
                 if (playing) {
-                    Intent intent = new Intent(Consts.RECEIVER_ACTION);
-                    intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
-                    sendBroadcast(intent);
+                    stopRadioService();
                 } else {
-                    String savedUrl = sPref.getString(SAVED_URL, "http://radio.myudm.ru:10000/udm");
-                    Intent intent = new Intent(Consts.RECEIVER_ACTION);
-                    intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
-                    intent.putExtra(Consts.STATION_URL, savedUrl);
-                    sendBroadcast(intent);
+                    startRadioService();
                 }
             }
         });
 
-        sPref = getPreferences(MODE_PRIVATE);
-        setTitle(sPref.getString(STATION_TITLE, "Радио"));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        setTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
+
+        String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+        setPlayerAnimation(command);
 
         updateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
 
-                switch (command) {
-                    case Consts.PlayerCommands.PREPARE:
-                        preparePlay();
-                        break;
-                    case Consts.PlayerCommands.PLAY:
-                        startPlaying();
-                        break;
-                    case Consts.PlayerCommands.PAUSE:
-                        stopPlaying();
-                        break;
-                }
+                setPlayerAnimation(command);
             }
         };
         IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
         this.registerReceiver(updateReceiver, intentFilter);
-        this.startService(new Intent(this, OnlineRadioService.class));
 	}
 
-    private void preparePlay() {
+    private void setPlayerAnimation(String command) {
+        switch (command) {
+            case Consts.PlayerCommands.PREPARE:
+                preparePlayAnimation();
+                break;
+            case Consts.PlayerCommands.IS_PLAYING:
+                startPlayingAnimation();
+                break;
+            case Consts.PlayerCommands.PAUSE:
+                stopPlayingAnimation();
+                break;
+        }
+    }
+
+    private void preparePlayAnimation() {
         playing = true;
         // индикация загрузки
         Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
@@ -96,20 +95,40 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         imageView.setImageResource(R.drawable.pause);
     }
 
-    private void startPlaying() {
+    private void startPlayingAnimation() {
         playing = true;
         // остановка индикации загрузки
         imageView.clearAnimation();
+        imageView.setImageResource(R.drawable.pause);
         // начало анимации воспроизвдения
         rippleBackground.startRippleAnimation();
     }
 
-    private void stopPlaying() {
+    private void stopPlayingAnimation() {
         playing = false;
         // остановка индикации загрузки
         imageView.clearAnimation();
         rippleBackground.stopRippleAnimation();
         imageView.setImageResource(R.drawable.play);
+    }
+
+    private void startRadioService() {
+        Log.d(Consts.LOG_TAG, "MainActivity: startRadioService");
+        this.startService(new Intent(this, OnlineRadioService.class));
+
+        Intent intentPreparePlay = new Intent(Consts.RECEIVER_ACTION);
+        intentPreparePlay.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
+        sendBroadcast(intentPreparePlay);
+    }
+
+    private void stopRadioService() {
+        Log.d(Consts.LOG_TAG, "MainActivity: stopRadioService");
+        Intent receiverIntent = new Intent(Consts.RECEIVER_ACTION);
+        receiverIntent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+        sendBroadcast(receiverIntent);
+
+        Intent serviceIntent = new Intent(MainActivity.this, OnlineRadioService.class);
+        stopService(serviceIntent);
     }
 
     @Override
@@ -133,16 +152,15 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     @Override
     public void onClick(String title, String url) {
-        Toast.makeText(this, "Загрузка...", Toast.LENGTH_SHORT).show();
+        stopRadioService();
+
+        Toast.makeText(this, getString(R.string.loading), Toast.LENGTH_SHORT).show();
         setTitle(title);
-//        stopPlaying();
-//        startPlaying();
-        Intent intent = new Intent(Consts.RECEIVER_ACTION);
-        intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
-        intent.putExtra(Consts.STATION_URL, url);
-        this.sendBroadcast(intent);
-        sPref.edit().putString(SAVED_URL, url).apply();
-        sPref.edit().putString(STATION_TITLE, getTitle().toString()).apply();
+
+        sharedPreferences.edit().putString(Consts.SAVED_URL, url).apply();
+        sharedPreferences.edit().putString(Consts.STATION_TITLE, getTitle().toString()).apply();
+
+        startRadioService();
     }
 
 }

@@ -23,6 +23,11 @@ import com.skyfishjy.library.RippleBackground;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 public class MainActivity extends Activity implements TagCloudView.TagCallback {
     private TagCloudView mTagCloudView;
 
@@ -37,19 +42,22 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		LinearLayout container = (LinearLayout) findViewById(R.id.tagCloud);
+        StationsService service = getStationsService();
+        loadingStationsAnimation();
+        service.getStations(new Callback<List<Tag>>() {
+            @Override
+            public void success(List<Tag> tags, Response response) {
+                onLoadingSuccess(tags);
+            }
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
+            @Override
+            public void failure(RetrofitError error) {
+                Toast.makeText(MainActivity.this, getString(R.string.loading_stations_error), Toast.LENGTH_SHORT).show();
+                onLoadingSuccess(createTags());
+            }
+        });
 
-		mTagCloudView = new TagCloudView(this, width, width, createTags(), 0, 40); // passing
-		mTagCloudView.requestFocus();
-		mTagCloudView.setFocusableInTouchMode(true);
-		container.addView(mTagCloudView);
-
-        rippleBackground=(RippleBackground)findViewById(R.id.content);
+		rippleBackground=(RippleBackground)findViewById(R.id.content);
         imageView=(ImageView)findViewById(R.id.centerImage);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,10 +71,6 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         });
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        setTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
-
-        String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
-        setPlayerAnimation(command);
 
         updateReceiver = new BroadcastReceiver() {
             @Override
@@ -79,6 +83,38 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
         this.registerReceiver(updateReceiver, intentFilter);
 	}
+
+    private void onLoadingSuccess(List<Tag> tags) {
+        LinearLayout container = (LinearLayout) findViewById(R.id.tagCloud);
+        container.setVisibility(View.VISIBLE);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+
+        mTagCloudView = new TagCloudView(this, width, width, tags, 0, 40); // passing
+        mTagCloudView.requestFocus();
+        mTagCloudView.setFocusableInTouchMode(true);
+        container.addView(mTagCloudView);
+
+        setTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
+
+        String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+        setPlayerAnimation(command);
+    }
+
+    private void loadingStationsAnimation() {
+        Toast.makeText(this, getString(R.string.loading_stations), Toast.LENGTH_SHORT).show();
+    }
+
+    private StationsService getStationsService() {
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(Consts.ENDPOINT)
+                .build();
+
+        return restAdapter.create(StationsService.class);
+    }
 
     private void setPlayerAnimation(String command) {
         switch (command) {

@@ -136,14 +136,14 @@ public class OnlineRadioService extends Service {
 
         Intent serviceIntent = new Intent(this, OnlineRadioService.class);
         serviceIntent.setAction(Consts.STOP_SERVICE);
-        PendingIntent pausePendingIntent = PendingIntent.getService(context, 0, serviceIntent, 0);
+        PendingIntent stopPendingIntent = PendingIntent.getService(context, 0, serviceIntent, 0);
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentIntent(contentIntent)
                 .setSmallIcon(R.drawable.play)
                 .setContentTitle(notificationTitle)
                 .setContentText(station)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent);
+                .setDeleteIntent(stopPendingIntent)
+                .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setVisibility(Notification.VISIBILITY_PUBLIC)

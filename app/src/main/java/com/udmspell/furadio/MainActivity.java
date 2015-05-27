@@ -16,6 +16,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.skyfishjy.library.RippleBackground;
@@ -36,6 +37,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     private ImageView imageView;
     private SharedPreferences sharedPreferences;
     private BroadcastReceiver updateReceiver;
+    private TextView title;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +59,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
             }
         });
 
+        title = (TextView) findViewById(R.id.title);
 		rippleBackground=(RippleBackground)findViewById(R.id.content);
         imageView=(ImageView)findViewById(R.id.centerImage);
         imageView.setOnClickListener(new View.OnClickListener() {
@@ -91,17 +94,21 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int width = size.x;
+        int width = (int) (size.x * Consts.CLOUD_WIDTH_SCALE);
 
         mTagCloudView = new TagCloudView(this, width, width, tags, 0, 40); // passing
         mTagCloudView.requestFocus();
         mTagCloudView.setFocusableInTouchMode(true);
         container.addView(mTagCloudView);
 
-        setTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
+        setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
 
         String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
         setPlayerAnimation(command);
+    }
+
+    private void setStationTitle(String string) {
+        title.setText(string);
     }
 
     private void loadingStationsAnimation() {
@@ -189,7 +196,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         stopRadioService();
 
         Toast.makeText(this, getString(R.string.loading), Toast.LENGTH_SHORT).show();
-        setTitle(title);
+        setStationTitle(title);
 
         sharedPreferences.edit().putString(Consts.SAVED_URL, url).apply();
         sharedPreferences.edit().putString(Consts.STATION_TITLE, getTitle().toString()).apply();

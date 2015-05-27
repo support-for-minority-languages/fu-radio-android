@@ -12,6 +12,7 @@
         <activity
             android:name="com.udmspell.furadio.MainActivity"
             android:label="@string/app_name"
+            android:theme="@android:style/Theme.Holo.NoActionBar"
             android:screenOrientation="portrait"
             android:launchMode="singleTop">
             <intent-filter>

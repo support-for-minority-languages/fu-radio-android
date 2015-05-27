@@ -25,7 +25,6 @@ public class OnlineRadioService extends Service {
     private BroadcastReceiver controlReceiver;
     private MediaPlayer mediaPlayer;
     private SharedPreferences sharedPreferences;
-    private boolean isPreparing = false;
 
     @Override
     public void onCreate() {
@@ -55,14 +54,11 @@ public class OnlineRadioService extends Service {
         IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
         this.registerReceiver(controlReceiver, intentFilter);
 
-//        controlReceiver = new ControlReceiver();
-//        IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
-//        this.registerReceiver(controlReceiver, intentFilter);
         makeNotification();
     }
 
     private void playRadio(String stationUrl) {
-        if (mediaPlayer != null && !isPreparing) {
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
@@ -82,16 +78,15 @@ public class OnlineRadioService extends Service {
                 intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.IS_PLAYING);
                 sendBroadcast(intent);
                 mediaPlayer.start();
-                isPreparing = false;
             }
         });
         mediaPlayer.prepareAsync();
-        isPreparing = true;
     }
 
     public void stopRadio() {
         sharedPreferences.edit().putString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE).apply();
-        if (mediaPlayer != null && !isPreparing) {
+        if (mediaPlayer != null) {
+            Log.d(Consts.LOG_TAG, "OnlineRadioService: player stoped");
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
@@ -101,6 +96,7 @@ public class OnlineRadioService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.d(Consts.LOG_TAG, "OnlineRadioService: onDestroy");
         super.onDestroy();
         stopRadio();
 

@@ -115,7 +115,11 @@ public class OnlineRadioService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction() == Consts.STOP_SERVICE) {
+        if (intent != null) {
+            if (intent.getAction() == Consts.STOP_SERVICE) {
+                stopSelf();
+            }
+        } else {
             stopSelf();
         }
         return super.onStartCommand(intent, flags, startId);

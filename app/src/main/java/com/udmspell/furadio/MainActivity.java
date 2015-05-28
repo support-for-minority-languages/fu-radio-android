@@ -259,6 +259,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopRadioService();
         unregisterReceiver(updateReceiver);
     }
 

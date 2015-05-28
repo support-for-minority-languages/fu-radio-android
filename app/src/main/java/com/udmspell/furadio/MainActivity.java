@@ -69,6 +69,8 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         });
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
         String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
         Log.d(Consts.LOG_TAG, "MainActivity: start command:" + command);
         if (command.equals(Consts.PlayerCommands.PAUSE)) {
@@ -121,8 +123,6 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         mTagCloudView.requestFocus();
         mTagCloudView.setFocusableInTouchMode(true);
         tagCloud.addView(mTagCloudView);
-
-        setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
     }
 
     private void startStationsLoadAnim() {
@@ -284,7 +284,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         setStationTitle(title);
 
         sharedPreferences.edit().putString(Consts.SAVED_URL, url).apply();
-        sharedPreferences.edit().putString(Consts.STATION_TITLE, getTitle().toString()).apply();
+        sharedPreferences.edit().putString(Consts.STATION_TITLE, title).apply();
 
         startRadioService();
     }

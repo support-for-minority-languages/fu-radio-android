@@ -38,8 +38,8 @@
         app:rb_scale="6">
         <ImageView
             android:id="@+id/centerImage"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/center_image_size"
+            android:layout_height="@dimen/center_image_size"
             android:layout_centerInParent="true"
             android:src="@drawable/play" />
     </com.skyfishjy.library.RippleBackground>

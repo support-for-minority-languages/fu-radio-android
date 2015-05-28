@@ -44,21 +44,6 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-        StationsService service = getStationsService();
-        loadingStationsAnimation();
-        service.getStations(new Callback<List<Tag>>() {
-            @Override
-            public void success(List<Tag> tags, Response response) {
-                onLoadingSuccess(tags);
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Toast.makeText(MainActivity.this, getString(R.string.loading_stations_error), Toast.LENGTH_SHORT).show();
-                onLoadingSuccess(createTags());
-            }
-        });
-
         title = (TextView) findViewById(R.id.title);
 		rippleBackground=(RippleBackground)findViewById(R.id.content);
         imageView=(ImageView)findViewById(R.id.centerImage);
@@ -74,6 +59,26 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         });
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
+        if (command == Consts.PlayerCommands.PAUSE) {
+            loadingStationsAnimation();
+        } else {
+            setPlayerAnimation(command);
+        }
+
+        StationsService service = getStationsService();
+        service.getStations(new Callback<List<Tag>>() {
+            @Override
+            public void success(List<Tag> tags, Response response) {
+                onLoadingSuccess(tags);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Toast.makeText(MainActivity.this, getString(R.string.loading_stations_error), Toast.LENGTH_SHORT).show();
+                onLoadingSuccess(createTags());
+            }
+        });
 
         updateReceiver = new BroadcastReceiver() {
             @Override
@@ -102,9 +107,6 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         container.addView(mTagCloudView);
 
         setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
-
-        String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
-        setPlayerAnimation(command);
     }
 
     private void setStationTitle(String string) {

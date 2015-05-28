@@ -8,14 +8,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,10 +36,15 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     private boolean playing = false;
     private RippleBackground rippleBackground;
-    private ImageView imageView;
+    private ImageView centerImage;
+    private ImageView centerImageLarge;
     private SharedPreferences sharedPreferences;
     private BroadcastReceiver updateReceiver;
     private TextView title;
+    private ViewGroup actionBar;
+    private ViewGroup tagCloud;
+    private boolean timeEscaped = false;
+    private boolean stationsLoaded = false;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +52,12 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 		setContentView(R.layout.main);
 
         title = (TextView) findViewById(R.id.title);
+        actionBar = (ViewGroup) findViewById(R.id.actionBar);
+        tagCloud = (ViewGroup) findViewById(R.id.tagCloud);
 		rippleBackground=(RippleBackground)findViewById(R.id.content);
-        imageView=(ImageView)findViewById(R.id.centerImage);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        centerImageLarge =(ImageView)findViewById(R.id.centerImageLarge);
+        centerImage =(ImageView)findViewById(R.id.centerImage);
+        centerImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (playing) {
@@ -60,9 +70,12 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
-        if (command == Consts.PlayerCommands.PAUSE) {
-            loadingStationsAnimation();
+        Log.d(Consts.LOG_TAG, "MainActivity: start command:" + command);
+        if (command.equals(Consts.PlayerCommands.PAUSE)) {
+            startStationsLoadAnim();
         } else {
+            centerImageLarge.setVisibility(View.INVISIBLE);
+            centerImage.setVisibility(View.VISIBLE);
             setPlayerAnimation(command);
         }
 
@@ -93,8 +106,11 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 	}
 
     private void onLoadingSuccess(List<Tag> tags) {
-        LinearLayout container = (LinearLayout) findViewById(R.id.tagCloud);
-        container.setVisibility(View.VISIBLE);
+
+        stationsLoaded = true;
+        if (timeEscaped) {
+            stopStationsLoadAnim();
+        }
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -104,17 +120,79 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         mTagCloudView = new TagCloudView(this, width, width, tags, 0, 40); // passing
         mTagCloudView.requestFocus();
         mTagCloudView.setFocusableInTouchMode(true);
-        container.addView(mTagCloudView);
+        tagCloud.addView(mTagCloudView);
 
         setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
     }
 
-    private void setStationTitle(String string) {
-        title.setText(string);
+    private void startStationsLoadAnim() {
+        Toast.makeText(this, getString(R.string.loading_stations), Toast.LENGTH_LONG).show();
+
+        Handler handler1 = new Handler();
+        handler1.postDelayed(new Runnable() {
+            public void run() {
+                Animation scaleAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.scalerepeat);
+                centerImageLarge.startAnimation(scaleAnimation);
+            }
+        }, 500L);
+
+        Handler handler2 = new Handler();
+        handler2.postDelayed(new Runnable() {
+            public void run() {
+                timeEscaped = true;
+                if (stationsLoaded) {
+                    stopStationsLoadAnim();
+                }
+            }
+        }, 4000L);
     }
 
-    private void loadingStationsAnimation() {
-        Toast.makeText(this, getString(R.string.loading_stations), Toast.LENGTH_SHORT).show();
+    private void stopStationsLoadAnim() {
+        centerImageLarge.clearAnimation();
+
+        Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.stations_load_scale);
+        scaleAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                centerImageLarge.setVisibility(View.INVISIBLE);
+                centerImage.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        centerImageLarge.startAnimation(scaleAnimation);
+
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
+        alphaAnimation.setDuration(500L);
+        alphaAnimation.setStartOffset(100L);
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                actionBar.setVisibility(View.VISIBLE);
+                tagCloud.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        tagCloud.startAnimation(alphaAnimation);
+        actionBar.startAnimation(alphaAnimation);
+
     }
 
     private StationsService getStationsService() {
@@ -123,6 +201,10 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
                 .build();
 
         return restAdapter.create(StationsService.class);
+    }
+
+    private void setStationTitle(String string) {
+        title.setText(string);
     }
 
     private void setPlayerAnimation(String command) {
@@ -143,15 +225,15 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         playing = true;
         // индикация загрузки
         Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
-        imageView.startAnimation(scaleAnimation);
-        imageView.setImageResource(R.drawable.pause);
+        centerImage.startAnimation(scaleAnimation);
+        centerImage.setImageResource(R.drawable.pause);
     }
 
     private void startPlayingAnimation() {
         playing = true;
         // остановка индикации загрузки
-        imageView.clearAnimation();
-        imageView.setImageResource(R.drawable.pause);
+        centerImage.clearAnimation();
+        centerImage.setImageResource(R.drawable.pause);
         // начало анимации воспроизвдения
         rippleBackground.startRippleAnimation();
     }
@@ -159,9 +241,9 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     private void stopPlayingAnimation() {
         playing = false;
         // остановка индикации загрузки
-        imageView.clearAnimation();
+        centerImage.clearAnimation();
         rippleBackground.stopRippleAnimation();
-        imageView.setImageResource(R.drawable.play);
+        centerImage.setImageResource(R.drawable.play);
     }
 
     private void startRadioService() {

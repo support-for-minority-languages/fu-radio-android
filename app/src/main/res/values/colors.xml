@@ -2,4 +2,6 @@
 <resources>
     <color name="title_background">#c0696969</color>
     <color name="ripple_color">#ffe2932b</color>
+    <color name="primary">#696969</color>
+    <color name="primary_dark">#383838</color>
 </resources>

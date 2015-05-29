@@ -320,10 +320,9 @@ public class TagCloudView extends RelativeLayout {
 			}
 
 			break;
-		/*
-		 * case MotionEvent.ACTION_UP: //now it is clicked!!!! dx = x - centerX;
-		 * dy = y - centerY; break;
-		 */
+		 case MotionEvent.ACTION_UP: //now it is clicked!!!! dx = x - centerX;
+//		 	dy = y - centerY; break;
+			 actionMove = false;
 		}
 
 		Log.d(TAG, getTime() + "child movition2:x=" + x + ",y=" + y + ",action is [" + e.getAction() + "]");

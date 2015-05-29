@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FU Radio</string>
-    <string name="radio_title">Радио</string>
+    <string name="radio_title">Моя Удмуртия</string>
     <string name="start_radio_url">http://radio.myudm.ru:10000/udm</string>
     <string name="loading">Загрузка...</string>
     <string name="loading_stations">Загрузка станций...</string>

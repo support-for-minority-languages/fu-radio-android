@@ -16,6 +16,7 @@ public class Consts {
     public static final double CLOUD_WIDTH_SCALE = 0.75;
     public static final float DEFAULT_ROUND_SCALE = 1;
     public static final float LOAD_ROUND_SCALE = 3;
+    public static final long START_DELAY = 4000L;
 
     public class PlayerCommands {
         public static final String IS_PLAYING = "COMMAND_PLAY";

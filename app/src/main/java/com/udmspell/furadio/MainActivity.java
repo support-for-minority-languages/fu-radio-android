@@ -73,13 +73,13 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
         String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
         Log.d(Consts.LOG_TAG, "MainActivity: start command:" + command);
-        if (command.equals(Consts.PlayerCommands.PAUSE)) {
+//        if (command.equals(Consts.PlayerCommands.PAUSE)) {
             startStationsLoadAnim();
-        } else {
-            centerImageLarge.setVisibility(View.INVISIBLE);
-            centerImage.setVisibility(View.VISIBLE);
-            setPlayerAnimation(command);
-        }
+//        } else {
+//            centerImageLarge.setVisibility(View.INVISIBLE);
+//            centerImage.setVisibility(View.VISIBLE);
+//            setPlayerAnimation(command);
+//        }
 
         StationsService service = getStationsService();
         service.getStations(new Callback<List<Tag>>() {
@@ -99,11 +99,14 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
-
+                if (intent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+                    command = Consts.PlayerCommands.PAUSE;
+                }
                 setPlayerAnimation(command);
             }
         };
         IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
+        intentFilter.addAction(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         this.registerReceiver(updateReceiver, intentFilter);
 	}
 
@@ -144,7 +147,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
                     stopStationsLoadAnim();
                 }
             }
-        }, 4000L);
+        }, Consts.START_DELAY);
     }
 
     private void stopStationsLoadAnim() {

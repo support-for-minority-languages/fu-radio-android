@@ -45,13 +45,19 @@ public class OnlineRadioService extends Service {
             public void onReceive(Context context, Intent intent) {
                 String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
                 Log.d(Consts.LOG_TAG, "ControlReceiver: command=" + command);
-                if (command == Consts.PlayerCommands.PAUSE) {
-                    stopRadio();
+                Log.d(Consts.LOG_TAG, "ControlReceiver: getAction=" + intent.getAction());
+                if (intent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+                    stopSelf();
+                } else {
+                    if (command.equals(Consts.PlayerCommands.PAUSE)) {
+                        stopRadio();
+                    }
                 }
             }
 
         };
         IntentFilter intentFilter = new IntentFilter(Consts.RECEIVER_ACTION);
+        intentFilter.addAction(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         this.registerReceiver(controlReceiver, intentFilter);
 
         makeNotification();
@@ -91,7 +97,6 @@ public class OnlineRadioService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-
     }
 
     @Override
@@ -116,7 +121,7 @@ public class OnlineRadioService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            if (intent.getAction() == Consts.STOP_SERVICE) {
+            if (intent.getAction() != null && intent.getAction().equals(Consts.STOP_SERVICE)) {
                 stopSelf();
             }
         } else {

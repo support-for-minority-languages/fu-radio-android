@@ -1,4 +1,8 @@
 package com.udmspell.furadio;
+
+import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
+
 /**
  * Komodo Lab: Tagin! Project: 3D Tag Cloud
  * Google Summer of Code 2011
@@ -9,28 +13,16 @@ package com.udmspell.furadio;
  * Tag class:
  * For now tags are just cubes. Later they will be replaced by real texts!
  */
-public class Tag implements Comparable<Tag>{
+public class Tag extends SugarRecord<Tag> implements Comparable<Tag>{
 	public Tag() {
-		this("", 0f, 0f, 0f, 1.0f, 0, "");
-	}	
-	public Tag(String text, int popularity) {
-		this(text, 0f, 0f, 0f, 1.0f, popularity, "");
-	}	
-	public Tag(String text, int popularity, String url) {
-		this(text, 0f, 0f, 0f, 1.0f, popularity, url);
-	}	
-	public Tag(String text,float locX, float locY, float locZ) {
-		this(text, locX, locY, locZ, 1.0f, DEFAULT_POPULARITY, "");
 	}
-	public Tag(String text,float locX, float locY, float locZ, float scale) {
-		this(text, locX, locY, locZ, scale, DEFAULT_POPULARITY, "");
-	}
-	public Tag(String text,float locX, float locY, float locZ, float scale, int popularity,
-			   String url) {
+
+	public Tag(int stationId, String text, int popularity, String url) {
+        this.stationId = stationId;
 		this.text = text;
-    	this.locX = locX;
-    	this.locY = locY;
-    	this.locZ = locZ;
+    	this.locX = 0f;
+    	this.locY = 0f;
+    	this.locZ = 0f;
 
     	this.loc2DX = 0;
     	this.loc2DY=0;
@@ -40,7 +32,7 @@ public class Tag implements Comparable<Tag>{
     	this.colorB= 0.5f;
     	this.alpha = 1.0f;
     	
-    	this.scale = scale;
+    	this.scale = 1.0f;
     	this.popularity= popularity;
     	this.url = url;
     }	
@@ -142,13 +134,29 @@ public class Tag implements Comparable<Tag>{
 		this.url = url;
 	}
 
-	private String text, url;
-	private int popularity;  //this is the importance/popularity of the Tag 
+    public int getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(int stationId) {
+        this.stationId = stationId;
+    }
+
+	String text, url;
+    int stationId;
+	int popularity;  //this is the importance/popularity of the Tag
+	@Ignore
 	private int textSize;
+	@Ignore
 	private float locX, locY, locZ; //the center of the 3D Tag
+	@Ignore
 	private float loc2DX, loc2DY;
+	@Ignore
 	private float scale;
+	@Ignore
 	private float colorR, colorG, colorB, alpha;
+	@Ignore
     private static final int DEFAULT_POPULARITY = 1;
+	@Ignore
     private int paramNo; //parameter that holds the setting for this Tag
 }

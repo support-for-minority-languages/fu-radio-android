@@ -1,4 +1,6 @@
-package com.udmspell.furadio;
+package com.udmspell.furadio.services;
+
+import com.udmspell.furadio.models.Station;
 
 import java.util.List;
 
@@ -7,5 +9,5 @@ import retrofit.http.GET;
 
 public interface StationsService {
     @GET("/assets/files/stations.json")
-    void getStations(Callback<List<Tag>> callback);
+    void getStations(Callback<List<Station>> callback);
 }

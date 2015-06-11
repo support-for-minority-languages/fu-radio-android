@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.skyfishjy.library.RippleBackground;
+import com.udmspell.furadio.models.Station;
+import com.udmspell.furadio.services.StationsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,16 +84,16 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 //        }
 
         StationsService service = getStationsService();
-        service.getStations(new Callback<List<Tag>>() {
+        service.getStations(new Callback<List<Station>>() {
             @Override
-            public void success(List<Tag> tags, Response response) {
-                onLoadingSuccess(tags);
+            public void success(List<Station> stations, Response response) {
+                onLoadingSuccess(stations);
             }
 
             @Override
             public void failure(RetrofitError error) {
                 Toast.makeText(MainActivity.this, getString(R.string.loading_stations_error), Toast.LENGTH_SHORT).show();
-                onLoadingSuccess(createTags());
+                onLoadingSuccess(createStations());
             }
         });
 
@@ -110,7 +112,28 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         this.registerReceiver(updateReceiver, intentFilter);
 	}
 
-    private void onLoadingSuccess(List<Tag> tags) {
+    private void onLoadingSuccess(List<Station> stations) {
+
+        List<Tag> savedTags = Tag.listAll(Tag.class);
+        List<Tag> tags = new ArrayList<>();
+        for (Station station : stations) {
+            boolean findTag = false;
+            Tag newTag = null;
+            for (Tag tag: savedTags) {
+                if (station.getStationId() == tag.getStationId()) {
+                    findTag = true;
+                    newTag = tag;
+                    break;
+                }
+            }
+
+            if (!findTag) {
+                newTag = new Tag(station.getStationId(), station.getText(),
+                        station.getPopularity(), station.getUrl());
+                newTag.save();
+            }
+            tags.add(newTag);
+        }
 
         stationsLoaded = true;
         if (timeEscaped) {
@@ -256,6 +279,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
     private void stopRadioService() {
         Log.d(Consts.LOG_TAG, "MainActivity: stopRadioService");
+        stopPlayingAnimation();
         stopService(new Intent(this, OnlineRadioService.class));
     }
 
@@ -266,15 +290,15 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         unregisterReceiver(updateReceiver);
     }
 
-	private List<Tag> createTags() {
+	private List<Station> createStations() {
 		// create the list of tags with popularity values and related url
-		List<Tag> tempList = new ArrayList<>();
+		List<Station> tempList = new ArrayList<>();
 
-		tempList.add(new Tag("Моя Удмуртия", 7, "http://radio.myudm.ru:10010/mp3"));
-		tempList.add(new Tag("Удмуртское радио", 6, "http://radio.myudm.ru:10000/udm"));
-		tempList.add(new Tag("Марий Эл радио", 5, "http://r1.vmariel.ru:8000/mariel"));
-		tempList.add(new Tag("Коми Народное радио", 5, "http://188.94.173.197:4321/kominarodnoeradio.mp3"));
-		tempList.add(new Tag("RadioRock", 7, "http://rstream2.nelonenmedia.fi/Radiorock.mp3"));
+		tempList.add(new Station(1, "Моя Удмуртия", 7, "http://radio.myudm.ru:10010/mp3"));
+		tempList.add(new Station(2, "Удмуртское радио", 6, "http://radio.myudm.ru:10000/udm"));
+		tempList.add(new Station(3, "Марий Эл радио", 5, "http://r1.vmariel.ru:8000/mariel"));
+		tempList.add(new Station(4, "Коми Народное радио", 5, "http://188.94.173.197:4321/kominarodnoeradio.mp3"));
+		tempList.add(new Station(5, "RadioRock", 7, "http://rstream2.nelonenmedia.fi/Radiorock.mp3"));
 
 		return tempList;
 	}

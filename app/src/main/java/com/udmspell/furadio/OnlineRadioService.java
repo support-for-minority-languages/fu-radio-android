@@ -10,12 +10,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.udmspell.furadio.models.Song;
+
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created by ggrigoryev on 21.05.15.
@@ -70,6 +75,9 @@ public class OnlineRadioService extends Service {
             mediaPlayer = null;
         }
         sharedPreferences.edit().putString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE).apply();
+
+        new setSongInfo().execute(stationUrl);
+
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(stationUrl);
@@ -87,6 +95,10 @@ public class OnlineRadioService extends Service {
             }
         });
         mediaPlayer.prepareAsync();
+
+//        String artist =  metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+//        String title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+//        Log.d(Consts.LOG_TAG, "OnlineRadioService: artist=" + artist + ", title=" + title);
     }
 
     public void stopRadio() {
@@ -161,5 +173,29 @@ public class OnlineRadioService extends Service {
         notificationManager.notify(Consts.NOTIFICATION_ID, notification);
     }
 
+    private class setSongInfo extends AsyncTask<String, Void, Song> {
+
+        @Override
+        protected Song doInBackground(String... urls) {
+            IcyStreamMeta icy = null;
+            Song song = null;
+            try {
+                URL url = new URL(urls[0]);
+                icy = new IcyStreamMeta(url);
+                song = new Song(icy.getArtist(), icy.getTitle());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return song;
+        }
+
+        @Override
+        protected void onPostExecute(Song song) {
+            Log.d(Consts.LOG_TAG, "OnlineRadioService: artist=" + song.artist + ", title=" + song.title);
+        }
+    }
 
 }

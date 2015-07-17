@@ -146,7 +146,7 @@ public class TagCloudView extends RelativeLayout {
 			textViewList.get(i).setTextColor(mergedColor);
 			textViewList.get(i).setTextSize((int) (tempTag.getTextSize() * tempTag.getScale()));
 			addView(textViewList.get(i));
-			textViewList.get(i).setOnClickListener(OnTagClickListener(tempTag.getText(), tempTag.getUrl()));
+			textViewList.get(i).setOnClickListener(OnTagClickListener(tempTag.getId(), tempTag.getText(), tempTag.getUrl()));
 			i++;
 		}
 	}
@@ -178,7 +178,7 @@ public class TagCloudView extends RelativeLayout {
 		textViewList.get(i).setTextColor(mergedColor);
 		textViewList.get(i).setTextSize((int) (newTag.getTextSize() * newTag.getScale()));
 		addView(textViewList.get(i));
-		textViewList.get(i).setOnClickListener(OnTagClickListener(newTag.getText(), newTag.getUrl()));
+		textViewList.get(i).setOnClickListener(OnTagClickListener(newTag.getId(), newTag.getText(), newTag.getUrl()));
 
 		textViewList.get(i).setOnTouchListener(new OnTouchListener() {
 
@@ -374,7 +374,7 @@ public class TagCloudView extends RelativeLayout {
 	// for handling the click on the tags
 	// onclick open the tag url in a new window. Back button will bring you back
 	// to TagCloud
-	View.OnClickListener OnTagClickListener(final String title, final String url) {
+	View.OnClickListener OnTagClickListener(final Long id, final String title, final String url) {
 		return new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -382,7 +382,15 @@ public class TagCloudView extends RelativeLayout {
                     actionMove = false;
                     return;
                 }
-
+				List<Tag> findTags = Tag.find(Tag.class, "id = ?", String.valueOf(id));
+				if (findTags.size() > 0) {
+					Tag tag = findTags.get(0);
+					tag.setPopularity(tag.getPopularity() + 1);
+					Log.d(TAG, "OnTagClickListener: tag id=" + tag.getId() + ", name=" + tag.getText() + ", popul=" + tag.getPopularity());
+					tag.save();
+				} else {
+					Log.d(TAG, "OnTagClickListener: not found tag with id = " + id);
+				}
                 Animation scaleAnimation = AnimationUtils.loadAnimation(mContext, R.anim.scale);
                 v.startAnimation(scaleAnimation);
                 tagCallback.onClick(title, url);

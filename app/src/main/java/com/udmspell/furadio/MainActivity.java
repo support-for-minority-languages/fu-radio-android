@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -75,13 +76,16 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         setStationTitle(sharedPreferences.getString(Consts.STATION_TITLE, getString(R.string.radio_title)));
         String command = sharedPreferences.getString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PAUSE);
         Log.d(Consts.LOG_TAG, "MainActivity: start command:" + command);
-//        if (command.equals(Consts.PlayerCommands.PAUSE)) {
+        if (command.equals(Consts.PlayerCommands.PAUSE)) {
             startStationsLoadAnim();
-//        } else {
-//            centerImageLarge.setVisibility(View.INVISIBLE);
-//            centerImage.setVisibility(View.VISIBLE);
-//            setPlayerAnimation(command);
-//        }
+        } else {
+            centerImageLarge.setVisibility(View.INVISIBLE);
+            centerImage.setVisibility(View.VISIBLE);
+            actionBar.setVisibility(View.VISIBLE);
+            tagCloud.setVisibility(View.VISIBLE);
+            setPlayerAnimation(command);
+            onStartAfterClose();
+        }
 
         StationsService service = getStationsService();
         service.getStations(new Callback<List<Station>>() {
@@ -145,7 +149,21 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         display.getSize(size);
         int width = (int) (size.x * Consts.CLOUD_WIDTH_SCALE);
 
-        mTagCloudView = new TagCloudView(this, width, width, tags, 0, 40); // passing
+        mTagCloudView = new TagCloudView(this, width, width, tags, 0, 30); // passing
+        mTagCloudView.requestFocus();
+        mTagCloudView.setFocusableInTouchMode(true);
+        tagCloud.addView(mTagCloudView);
+    }
+
+    private void onStartAfterClose() {
+
+        List<Tag> savedTags = Tag.listAll(Tag.class);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = (int) (size.x * Consts.CLOUD_WIDTH_SCALE);
+
+        mTagCloudView = new TagCloudView(this, width, width, savedTags, 0, 30); // passing
         mTagCloudView.requestFocus();
         mTagCloudView.setFocusableInTouchMode(true);
         tagCloud.addView(mTagCloudView);
@@ -199,6 +217,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
         alphaAnimation.setDuration(500L);
         alphaAnimation.setStartOffset(100L);
+        alphaAnimation.setInterpolator(new DecelerateInterpolator());
         alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -286,7 +305,6 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopRadioService();
         unregisterReceiver(updateReceiver);
     }
 

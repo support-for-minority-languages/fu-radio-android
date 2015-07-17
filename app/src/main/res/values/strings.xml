@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FU Radio</string>
-    <string name="radio_title">Моя Удмуртия</string>
+    <string name="app_name">Финн-угор радио</string>
+    <string name="radio_title">Удмурт радио</string>
     <string name="start_radio_url">http://radio.myudm.ru:10000/udm</string>
-    <string name="loading">Загрузка...</string>
-    <string name="loading_stations">Загрузка станций...</string>
-    <string name="loading_stations_error">Не удалось загрузить список станций с сервера</string>
+    <string name="loading">Кӧня ке возьмалэ…</string>
+    <string name="loading_stations">Выльдӥськисько…</string>
+    <string name="loading_stations_error">Выльдӥськиськыны ӧз пӧрмы</string>
 </resources>

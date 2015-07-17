@@ -295,7 +295,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 		List<Station> tempList = new ArrayList<>();
 
 		tempList.add(new Station(1, "Моя Удмуртия", 7, "http://radio.myudm.ru:10010/mp3"));
-		tempList.add(new Station(2, "Удмуртское радио", 6, "http://radio.myudm.ru:10000/udm"));
+		tempList.add(new Station(2, "Удмурт радио", 6, "http://radio.myudm.ru:10000/udm"));
 		tempList.add(new Station(3, "Марий Эл радио", 5, "http://r1.vmariel.ru:8000/mariel"));
 		tempList.add(new Station(4, "Коми Народное радио", 5, "http://188.94.173.197:4321/kominarodnoeradio.mp3"));
 		tempList.add(new Station(5, "RadioRock", 7, "http://rstream2.nelonenmedia.fi/Radiorock.mp3"));

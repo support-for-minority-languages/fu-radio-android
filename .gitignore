@@ -11,3 +11,5 @@ gradlew
 gradlew.bat
 .idea/
 app/app.iml
+app/build/
+furadio.iml

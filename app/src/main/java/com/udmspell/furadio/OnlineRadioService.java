@@ -76,7 +76,7 @@ public class OnlineRadioService extends Service {
         }
         sharedPreferences.edit().putString(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE).apply();
 
-        new setSongInfo().execute(stationUrl);
+//        new setSongInfo().execute(stationUrl);
 
         mediaPlayer = new MediaPlayer();
         try {

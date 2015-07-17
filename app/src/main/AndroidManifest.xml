@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.udmspell.furadio"
-    android:versionCode="1"
-    android:versionName="0.1beta">
+    android:versionCode="3"
+    android:versionName="0.2beta">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -29,6 +29,9 @@
             </intent-filter>
         </activity>
         <service android:name=".OnlineRadioService"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="762bd97a70b84b56002822be107597c9b58ec1aa" />
     </application>
 
 </manifest>

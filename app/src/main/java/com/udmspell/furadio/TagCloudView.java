@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TagCloudView extends RelativeLayout {
+	private static final double MAX_MOVE_DX = 0.5;
 	RelativeLayout navigation_bar;
 	TextView mTextView1;
 
@@ -292,11 +293,13 @@ public class TagCloudView extends RelativeLayout {
 			break;
 		case MotionEvent.ACTION_MOVE:
 
-            actionMove = true;
 			// rotate elements depending on how far the selection point is from
 			// center of cloud
 			float dx = x - oldX;
 			float dy = y - oldY;
+			if (dx > MAX_MOVE_DX || dy > MAX_MOVE_DX) {
+				actionMove = true;
+			}
 			oldX = x;
 			oldY = y;
 			mAngleX = (dy / radius) * tspeed * TOUCH_SCALE_FACTOR;

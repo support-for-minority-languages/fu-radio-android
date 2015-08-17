@@ -303,12 +303,10 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
     }
 
     private void startRadioService() {
-        Log.d(Consts.LOG_TAG, "MainActivity: startRadioService");
         startService(new Intent(this, OnlineRadioService.class));
     }
 
     private void stopRadioService() {
-        Log.d(Consts.LOG_TAG, "MainActivity: stopRadioService");
         stopPlayingAnimation();
         stopService(new Intent(this, OnlineRadioService.class));
     }
@@ -356,6 +354,10 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
         switch (item.getItemId()) {
             case R.id.about:
                 startActivity(new Intent(MainActivity.this, AboutActivity.class));
+                return true;
+            case R.id.exit:
+                startRadioService();
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -3,35 +3,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.udmspell.furadio"
     android:versionCode="3"
-    android:versionName="0.2beta">
+    android:versionName="0.2beta" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        tools:replace="android:icon"
+        android:name="com.orm.SugarApp"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name="com.orm.SugarApp">
-        <meta-data android:name="DATABASE" android:value="fustations.db" />
-        <meta-data android:name="VERSION" android:value="1" />
-        <meta-data android:name="QUERY_LOG" android:value="true" />
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.udmspell" />
+        tools:replace="android:icon" >
+        <meta-data
+            android:name="DATABASE"
+            android:value="fustations.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="1" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true" />
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="com.udmspell" />
+
         <activity
-            android:name="com.udmspell.furadio.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppBaseTheme"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop">
+            android:theme="@style/AppBaseTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".OnlineRadioService"/>
+
+        <service android:name=".OnlineRadioService" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="762bd97a70b84b56002822be107597c9b58ec1aa" />
+
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/about"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppBaseTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.udmspell.furadio.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -8,4 +8,8 @@
     <string name="loading_stations_error">Выльдӥськиськыны ӧз пӧрмы</string>
     <string name="about">Ми сярысь</string>
     <string name="settings">Тупатонъёс</string>
+    <string name="title_activity_about">AboutActivity</string>
+
+    <string name="about_text">Удмуртлык. Пайдаен асьме калыклы </string>
+    <string name="action_settings">Settings</string>
 </resources>

@@ -177,13 +177,16 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
     private void startStationsLoadAnim() {
         Toast.makeText(this, getString(R.string.loading_stations), Toast.LENGTH_LONG).show();
 
+        Animation startAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.start_anim);
+        centerImageLarge.startAnimation(startAnimation);
+
         Handler handler1 = new Handler();
         handler1.postDelayed(new Runnable() {
             public void run() {
                 Animation scaleAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.scalerepeat);
                 centerImageLarge.startAnimation(scaleAnimation);
             }
-        }, 500L);
+        }, 600L);
 
         Handler handler2 = new Handler();
         handler2.postDelayed(new Runnable() {

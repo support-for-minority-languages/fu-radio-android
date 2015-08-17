@@ -133,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
                 if (station.getStationId() == tag.getStationId()) {
                     findTag = true;
                     newTag = tag;
+                    newTag.setText(station.getText());
+                    newTag.setUrl(station.getUrl());
                     break;
                 }
             }

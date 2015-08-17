@@ -6,4 +6,6 @@
     <string name="loading">Кӧня ке возьмалэ…</string>
     <string name="loading_stations">Выльдӥськисько…</string>
     <string name="loading_stations_error">Выльдӥськиськыны ӧз пӧрмы</string>
+    <string name="about">Ми сярысь</string>
+    <string name="settings">Тупатонъёс</string>
 </resources>

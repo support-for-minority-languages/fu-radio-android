@@ -1,6 +1,5 @@
 package com.udmspell.furadio;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +9,11 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -36,7 +38,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class MainActivity extends Activity implements TagCloudView.TagCallback {
+public class MainActivity extends AppCompatActivity implements TagCloudView.TagCallback {
     private TagCloudView mTagCloudView;
 
     private boolean playing = false;
@@ -46,7 +48,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
     private SharedPreferences sharedPreferences;
     private BroadcastReceiver updateReceiver;
     private TextView title;
-    private ViewGroup actionBar;
+    private Toolbar toolbar;
     private ViewGroup tagCloud;
     private boolean timeEscaped = false;
     private boolean stationsLoaded = false;
@@ -56,9 +58,9 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 		super.onCreate(savedInstanceState);
 		Fabric.with(this, new Crashlytics());
 		setContentView(R.layout.main);
-
+        toolbar = (Toolbar) findViewById(R.id.actionBar);
+        setSupportActionBar(toolbar);
         title = (TextView) findViewById(R.id.title);
-        actionBar = (ViewGroup) findViewById(R.id.actionBar);
         tagCloud = (ViewGroup) findViewById(R.id.tagCloud);
 		rippleBackground=(RippleBackground)findViewById(R.id.content);
         centerImageLarge =(ImageView)findViewById(R.id.centerImageLarge);
@@ -84,7 +86,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         } else {
             centerImageLarge.setVisibility(View.INVISIBLE);
             centerImage.setVisibility(View.VISIBLE);
-            actionBar.setVisibility(View.VISIBLE);
+            toolbar.setVisibility(View.VISIBLE);
             tagCloud.setVisibility(View.VISIBLE);
             setPlayerAnimation(command);
             onStartAfterClose();
@@ -229,7 +231,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                actionBar.setVisibility(View.VISIBLE);
+                toolbar.setVisibility(View.VISIBLE);
                 tagCloud.setVisibility(View.VISIBLE);
             }
 
@@ -239,7 +241,7 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
             }
         });
         tagCloud.startAnimation(alphaAnimation);
-        actionBar.startAnimation(alphaAnimation);
+        toolbar.startAnimation(alphaAnimation);
 
     }
 
@@ -337,5 +339,11 @@ public class MainActivity extends Activity implements TagCloudView.TagCallback {
         startRadioService();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+
+    }
 }
 

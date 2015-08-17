@@ -4,4 +4,5 @@
     <color name="ripple_color">#ffe2932b</color>
     <color name="primary">#696969</color>
     <color name="primary_dark">#383838</color>
+    <color name="app_background">#212121</color>
 </resources>

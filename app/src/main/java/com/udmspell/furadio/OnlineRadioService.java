@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -154,9 +156,11 @@ public class OnlineRadioService extends Service {
         Intent serviceIntent = new Intent(this, OnlineRadioService.class);
         serviceIntent.setAction(Consts.STOP_SERVICE);
         PendingIntent stopPendingIntent = PendingIntent.getService(context, 0, serviceIntent, 0);
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.play);
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.play)
+                .setSmallIcon(R.drawable.notif_icon)
+                .setLargeIcon(largeIcon)
                 .setContentTitle(notificationTitle)
                 .setContentText(station)
                 .setDeleteIntent(stopPendingIntent)

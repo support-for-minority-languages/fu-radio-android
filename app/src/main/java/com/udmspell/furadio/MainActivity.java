@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
         Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scalerepeat);
         centerImage.startAnimation(scaleAnimation);
         centerImage.setImageResource(R.drawable.pause);
+        rippleBackground.stopRippleAnimation();
     }
 
     private void startPlayingAnimation() {

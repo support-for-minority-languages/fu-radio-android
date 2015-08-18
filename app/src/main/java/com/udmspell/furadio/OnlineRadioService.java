@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -106,6 +107,31 @@ public class OnlineRadioService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                Log.d(Consts.LOG_TAG, "OnlineRadioService: onBufferingUpdate");
+            }
+        });
+        mediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                Log.d(Consts.LOG_TAG, "OnlineRadioService: onInfo: what=" + what + ", extra=" + extra);
+                switch (what) {
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                        Intent intent = new Intent(Consts.RECEIVER_ACTION);
+                        intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
+                        sendBroadcast(intent);
+                        break;
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                        intent = new Intent(Consts.RECEIVER_ACTION);
+                        intent.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.IS_PLAYING);
+                        sendBroadcast(intent);
+                        break;
+                }
+                return false;
+            }
+        });
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {

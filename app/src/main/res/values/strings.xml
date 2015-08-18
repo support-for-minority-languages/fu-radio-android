@@ -13,4 +13,6 @@
     <string name="about_text">Удмуртлык. Пайдаен асьме калыклы </string>
     <string name="action_settings">Settings</string>
     <string name="exit">Потоно</string>
+    <string name="programer">Кылдытӥсь: Григорьев Григорий</string>
+    <string name="designer">Суредаз: Штыкова Вера</string>
 </resources>

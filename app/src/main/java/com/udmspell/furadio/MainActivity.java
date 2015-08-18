@@ -356,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
                 startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 return true;
             case R.id.exit:
-                startRadioService();
+                stopRadioService();
                 finish();
                 return true;
             default:

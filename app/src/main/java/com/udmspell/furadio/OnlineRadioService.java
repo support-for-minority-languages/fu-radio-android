@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.udmspell.furadio.models.Song;
@@ -36,7 +37,6 @@ public class OnlineRadioService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(Consts.LOG_TAG, "OnlineRadioService: onCreate");
 
         Intent intentPreparePlay = new Intent(Consts.RECEIVER_ACTION);
         intentPreparePlay.putExtra(Consts.PLAYER_COMMAND, Consts.PlayerCommands.PREPARE);
@@ -44,15 +44,12 @@ public class OnlineRadioService extends Service {
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String stationUrl = sharedPreferences.getString(Consts.SAVED_URL, getString(R.string.start_radio_url));
-        Log.d(Consts.LOG_TAG, "ControlReceiver: stationUrl=" + stationUrl);
         playRadio(stationUrl);
 
         controlReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String command = intent.getStringExtra(Consts.PLAYER_COMMAND);
-                Log.d(Consts.LOG_TAG, "ControlReceiver: command=" + command);
-                Log.d(Consts.LOG_TAG, "ControlReceiver: getAction=" + intent.getAction());
                 if (intent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
                     stopSelf();
                 } else {
@@ -67,7 +64,30 @@ public class OnlineRadioService extends Service {
         intentFilter.addAction(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         this.registerReceiver(controlReceiver, intentFilter);
 
+        setPhoneStateListener();
+
         makeNotification();
+    }
+
+    private void setPhoneStateListener() {
+        PhoneStateListener phoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                if (state == TelephonyManager.CALL_STATE_RINGING) {
+                    //Incoming call: Pause music
+                    stopSelf();
+                } else if(state == TelephonyManager.CALL_STATE_IDLE) {
+                    //Not in call: Play music
+                } else if(state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                    //A call is dialing, active or on hold
+                }
+                super.onCallStateChanged(state, incomingNumber);
+            }
+        };
+        TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        if(mgr != null) {
+            mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
     }
 
     private void playRadio(String stationUrl) {

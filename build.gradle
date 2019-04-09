@@ -3,18 +3,21 @@ buildscript {
     repositories {
         jcenter()
         maven {
-            url 'https://repos.zeroturnaround.com/nexus/content/repositories/zt-public-releases'
+            url 'https://maven.google.com/'
+            name 'Google'
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
-        // This does not break the build when Android Studio is missing the JRebel for Android plugin.
-        classpath 'com.zeroturnaround.jrebel.android:jr-android-gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:3.3.2'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 }

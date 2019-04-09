@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.skyfishjy.library.RippleBackground;
 import com.udmspell.furadio.models.Station;
 import com.udmspell.furadio.services.StationsService;
@@ -33,7 +32,6 @@ import com.udmspell.furadio.services.StationsService;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fabric.sdk.android.Fabric;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -57,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Fabric.with(this, new Crashlytics());
 		setContentView(R.layout.main);
         toolbar = (Toolbar) findViewById(R.id.actionBar);
         setSupportActionBar(toolbar);
@@ -157,10 +154,12 @@ public class MainActivity extends AppCompatActivity implements TagCloudView.TagC
         display.getSize(size);
         int width = (int) (size.x * Consts.CLOUD_WIDTH_SCALE);
 
-        mTagCloudView = new TagCloudView(this, width, width, tags, 0, 30); // passing
-        mTagCloudView.requestFocus();
-        mTagCloudView.setFocusableInTouchMode(true);
-        tagCloud.addView(mTagCloudView);
+        if (tagCloud.getChildCount() == 0) {
+            mTagCloudView = new TagCloudView(this, width, width, tags, 0, 30); // passing
+            mTagCloudView.requestFocus();
+            mTagCloudView.setFocusableInTouchMode(true);
+            tagCloud.addView(mTagCloudView);
+        }
     }
 
     private void onStartAfterClose() {

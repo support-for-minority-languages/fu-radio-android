@@ -12,7 +12,7 @@ public class Consts {
     public static final int NOTIFICATION_ID = 1;
     public static final String LOG_TAG = "FU_RADIO";
     public static final String STOP_SERVICE = "STOP_SERVICE";
-    public static final String ENDPOINT = "http://udmspell.ru";
+    public static final String ENDPOINT = "https://vorgoron.github.io";
     public static final double CLOUD_WIDTH_SCALE = 0.75;
     public static final float DEFAULT_ROUND_SCALE = 1;
     public static final float LOAD_ROUND_SCALE = 3;

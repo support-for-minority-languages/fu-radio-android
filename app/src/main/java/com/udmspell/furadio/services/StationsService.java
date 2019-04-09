@@ -8,6 +8,6 @@ import retrofit.Callback;
 import retrofit.http.GET;
 
 public interface StationsService {
-    @GET("/assets/files/stations.json")
+    @GET("/radio/stations.json")
     void getStations(Callback<List<Station>> callback);
 }
